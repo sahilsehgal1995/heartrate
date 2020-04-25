@@ -18,21 +18,25 @@ def getData(URL):
 
 @app.route('/', methods=['GET'])
 def home():
-	heartRates = getData(request.args.get('url'))
-	
-	for heartRate in heartRates:
-		heartRate['start'] = datetime.fromtimestamp(heartRate['start']/1000.0)
-		heartRate['end'] = datetime.fromtimestamp(heartRate['end']/1000.0)
+	try:
+		heartRates = getData(request.args.get('url'))
+		
+		for heartRate in heartRates:
+			heartRate['start'] = datetime.fromtimestamp(heartRate['start']/1000.0)
+			heartRate['end'] = datetime.fromtimestamp(heartRate['end']/1000.0)
 
-	dataset = []
-	for heartRate in heartRates:
-	    heartRate['timestamp'] = heartRate['start'].strftime("%H:%M")
-	    heartRate['heart_beat'] = (int(heartRate['value']/10)*10)
-	    dataset.append([heartRate['timestamp'], heartRate['heart_beat']])
+		dataset = []
+		for heartRate in heartRates:
+		    heartRate['timestamp'] = heartRate['start'].strftime("%H:%M")
+		    heartRate['heart_beat'] = (int(heartRate['value']/10)*10)
+		    dataset.append([heartRate['timestamp'], heartRate['heart_beat']])
 
-	dataset.sort()
-	dataset = list(dataset for dataset,_ in itertools.groupby(dataset))
+		dataset.sort()
+		dataset = list(dataset for dataset,_ in itertools.groupby(dataset))
 
-	return excel.make_response_from_array(dataset, "csv", file_name="heart.csv")
+		return excel.make_response_from_array(dataset, "csv", file_name="heart.csv")
+	except Exception as e:
+		return str(e)
+
 
 app.run()
